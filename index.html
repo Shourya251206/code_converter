@@ -2,90 +2,130 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Code Converter</title>
+  <title>AI Code Converter</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #f0f8ff, #e6f0ff);
-      color: #333;
+      background: linear-gradient(135deg, #e0f7fa, #e1bee7);
       margin: 0;
-      padding: 20px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
 
-    h2 {
-      color: #2c3e50;
+    .container {
+      background-color: white;
+      padding: 30px 40px;
+      border-radius: 16px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.6s ease;
     }
 
-    form {
-      background-color: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      max-width: 500px;
-      margin-bottom: 30px;
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+      color: #555;
     }
 
     input[type="file"],
     select {
       width: 100%;
-      padding: 12px;
-      margin: 10px 0;
+      padding: 10px;
+      margin-top: 8px;
       border: 1px solid #ccc;
       border-radius: 8px;
     }
 
     button {
-      background-color: #3498db;
+      margin-top: 25px;
+      width: 100%;
+      background-color: #6200ea;
       color: white;
+      padding: 12px;
       border: none;
-      padding: 12px 20px;
-      border-radius: 8px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
 
     button:hover {
-      background-color: #2980b9;
+      background-color: #3700b3;
     }
 
-    #output {
-      white-space: pre-wrap;
-      background-color: #f4f4f4;
+    .output {
+      margin-top: 35px;
+      background: #f4f4f4;
       padding: 15px;
-      border-radius: 8px;
-      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      font-family: monospace;
+      white-space: pre-wrap;
       max-height: 400px;
       overflow: auto;
+    }
+
+    .loader {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <h2>💻 Code Converter</h2>
-  <form id="uploadForm" enctype="multipart/form-data">
-    <label for="file">Choose a code file:</label>
-    <input type="file" name="file" id="file" required>
 
-    <label for="target_language">Convert to:</label>
-    <select name="target_language" id="target_language" required>
-      <option value="Python">Python</option>
-      <option value="JavaScript">JavaScript</option>
-      <option value="Java">Java</option>
-      <option value="C++">C++</option>
-      <option value="C#">C#</option>
-    </select>
+  <div class="container">
+    <h1>⚡ AI Code Converter</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="file">Upload your code file</label>
+      <input type="file" name="file" id="file" required>
 
-    <button type="submit">🔁 Convert</button>
-  </form>
+      <label for="target_language">Select target language</label>
+      <select name="target_language" id="target_language" required>
+        <option value="Python">Python</option>
+        <option value="JavaScript">JavaScript</option>
+        <option value="Java">Java</option>
+        <option value="C++">C++</option>
+        <option value="C#">C#</option>
+      </select>
 
-  <h3>🎯 Converted Code Output</h3>
-  <div id="output">Converted code will appear here...</div>
+      <button type="submit">🔁 Convert Code</button>
+    </form>
+
+    <div class="loader" id="loader" style="display: none;">⏳ Converting... Please wait...</div>
+
+    <div class="output" id="output">Converted code will appear here...</div>
+  </div>
 
   <script>
-    document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+    const form = document.getElementById("uploadForm");
+    const output = document.getElementById("output");
+    const loader = document.getElementById("loader");
+
+    form.addEventListener("submit", async function (e) {
       e.preventDefault();
+      output.textContent = "";
+      loader.style.display = "block";
+
       const formData = new FormData(this);
-      const output = document.getElementById("output");
-      output.textContent = "Converting... Please wait...";
 
       try {
         const response = await fetch("/convert/", {
@@ -94,11 +134,15 @@
         });
 
         const result = await response.json();
+        loader.style.display = "none";
+
         output.textContent = result.converted_code || result.error || "Something went wrong.";
       } catch (err) {
+        loader.style.display = "none";
         output.textContent = "Error: " + err.message;
       }
     });
   </script>
+
 </body>
 </html>
