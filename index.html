@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Code Converter</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #f0f8ff, #e6f0ff);
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      color: #2c3e50;
+    }
+
+    form {
+      background-color: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      max-width: 500px;
+      margin-bottom: 30px;
+    }
+
+    input[type="file"],
+    select {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    #output {
+      white-space: pre-wrap;
+      background-color: #f4f4f4;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+      max-height: 400px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>💻 Code Converter</h2>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <label for="file">Choose a code file:</label>
+    <input type="file" name="file" id="file" required>
+
+    <label for="target_language">Convert to:</label>
+    <select name="target_language" id="target_language" required>
+      <option value="Python">Python</option>
+      <option value="JavaScript">JavaScript</option>
+      <option value="Java">Java</option>
+      <option value="C++">C++</option>
+      <option value="C#">C#</option>
+    </select>
+
+    <button type="submit">🔁 Convert</button>
+  </form>
+
+  <h3>🎯 Converted Code Output</h3>
+  <div id="output">Converted code will appear here...</div>
+
+  <script>
+    document.getElementById("uploadForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const formData = new FormData(this);
+      const output = document.getElementById("output");
+      output.textContent = "Converting... Please wait...";
+
+      try {
+        const response = await fetch("/convert/", {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await response.json();
+        output.textContent = result.converted_code || result.error || "Something went wrong.";
+      } catch (err) {
+        output.textContent = "Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
