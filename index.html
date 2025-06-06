@@ -2,147 +2,804 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AI Code Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Code Converter Pro</title>
   <style>
     * {
       box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #e0f7fa, #e1bee7);
       margin: 0;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      padding: 0;
     }
-
+    
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+      overflow-x: hidden;
+    }
+    
     .container {
-      background-color: white;
-      padding: 30px 40px;
-      border-radius: 16px;
-      max-width: 700px;
-      width: 100%;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      animation: fadeIn 0.6s ease;
+      max-width: 1200px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      animation: slideUp 0.8s ease-out;
     }
-
-    h1 {
+    
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      padding: 40px;
       text-align: center;
-      color: #333;
+      position: relative;
+      overflow: hidden;
     }
-
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .header p {
+      font-size: 1.2rem;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      padding: 40px;
+    }
+    
+    .input-section, .output-section {
+      background: white;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    
+    .input-section:hover, .output-section:hover {
+      transform: translateY(-5px);
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .form-group {
+      margin-bottom: 25px;
+    }
+    
     label {
       display: block;
-      margin-top: 15px;
       font-weight: 600;
       color: #555;
+      margin-bottom: 8px;
+      font-size: 0.95rem;
     }
-
-    input[type="file"],
+    
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+    
+    .file-input {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+    
+    .file-input-display {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      border: 2px dashed #ccc;
+      border-radius: 12px;
+      background: #f8f9fa;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      min-height: 80px;
+    }
+    
+    .file-input-display:hover {
+      border-color: #667eea;
+      background: #f0f2ff;
+    }
+    
+    .file-input-display.dragover {
+      border-color: #667eea;
+      background: #e8f0fe;
+      transform: scale(1.02);
+    }
+    
+    .file-info {
+      display: none;
+      background: #e8f5e8;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    
     select {
       width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    button {
-      margin-top: 25px;
-      width: 100%;
-      background-color: #6200ea;
-      color: white;
-      padding: 12px;
-      border: none;
+      padding: 12px 16px;
+      border: 2px solid #e1e5e9;
       border-radius: 10px;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 1rem;
+      background: white;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: border-color 0.3s ease;
     }
-
-    button:hover {
-      background-color: #3700b3;
+    
+    select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
-
-    .output {
-      margin-top: 35px;
-      background: #f4f4f4;
-      padding: 15px;
-      border-radius: 10px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      max-height: 400px;
-      overflow: auto;
+    
+    .convert-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
-
+    
+    .convert-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    }
+    
+    .convert-btn:active {
+      transform: translateY(0);
+    }
+    
+    .convert-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
     .loader {
+      display: none;
       text-align: center;
-      font-size: 14px;
-      color: #666;
+      padding: 20px;
+      color: #667eea;
+      font-weight: 600;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
+    
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 10px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .output {
+      background: #1a1a1a;
+      color: #f8f8f2;
+      padding: 20px;
+      border-radius: 12px;
+      font-family: 'Fira Code', 'Consolas', monospace;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      max-height: 500px;
+      overflow: auto;
+      position: relative;
+      min-height: 200px;
+    }
+    
+    .output::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .output::-webkit-scrollbar-track {
+      background: #2a2a2a;
+      border-radius: 4px;
+    }
+    
+    .output::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 4px;
+    }
+    
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .output-section:hover .copy-btn {
+      opacity: 1;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin: 30px 40px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      color: #666;
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+    
+    .supported-formats {
+      margin: 30px 40px;
+      background: white;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .formats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .format-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      color: #555;
+      transition: all 0.3s ease;
+    }
+    
+    .format-item:hover {
+      background: #e8f0fe;
+      color: #667eea;
+      transform: translateY(-2px);
+    }
+    
+    .error {
+      color: #e74c3c;
+      background: #fdf2f2;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #e74c3c;
+    }
+    
+    .success {
+      color: #27ae60;
+      background: #f0f9f0;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #27ae60;
+    }
+    
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+        padding: 20px;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+        margin: 20px;
+      }
     }
   </style>
 </head>
 <body>
-
   <div class="container">
-    <h1>⚡ AI Code Converter</h1>
-    <form id="uploadForm" enctype="multipart/form-data">
-      <label for="file">Upload your code file</label>
-      <input type="file" name="file" id="file" required>
-
-      <label for="target_language">Select target language</label>
-      <select name="target_language" id="target_language" required>
-        <option value="Python">Python</option>
-        <option value="JavaScript">JavaScript</option>
-        <option value="Java">Java</option>
-        <option value="C++">C++</option>
-        <option value="C#">C#</option>
-      </select>
-
-      <button type="submit">🔁 Convert Code</button>
-    </form>
-
-    <div class="loader" id="loader" style="display: none;">⏳ Converting... Please wait...</div>
-
-    <div class="output" id="output">Converted code will appear here...</div>
+    <div class="header">
+      <h1>🚀 AI Code Converter Pro</h1>
+      <p>Transform your code between programming languages with AI precision</p>
+    </div>
+    
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number" id="conversionsCount">0</div>
+        <div class="stat-label">Conversions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="linesConverted">0</div>
+        <div class="stat-label">Lines Converted</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="avgTime">0ms</div>
+        <div class="stat-label">Avg Time</div>
+      </div>
+    </div>
+    
+    <div class="main-content">
+      <div class="input-section">
+        <h2 class="section-title">
+          📁 Input Code
+        </h2>
+        
+        <form id="uploadForm" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="file">Upload Code File</label>
+            <div class="file-input-wrapper">
+              <input type="file" name="file" id="file" class="file-input" accept=".py,.js,.java,.cpp,.cs,.c,.php,.rb,.go,.rs,.swift,.kt,.ts,.jsx,.tsx,.vue,.html,.css,.scss,.sass,.less,.sql,.r,.scala,.perl,.lua,.sh,.bat,.ps1,.m,.mm,.h,.hpp,.hxx,.cxx,.cc">
+              <div class="file-input-display" id="fileDisplay">
+                <div>
+                  <div style="font-size: 2rem; margin-bottom: 10px;">📎</div>
+                  <div><strong>Click to upload</strong> or drag & drop</div>
+                  <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                    Supports: .py, .js, .java, .cpp, .cs, .c, .php, .rb, .go, .rs, .swift, .kt, .ts, .jsx, .tsx, .vue, .html, .css, .scss, .sass, .less, .sql, .r, .scala, .perl, .lua, .sh, .bat, .ps1, .m, .mm, .h, .hpp, .hxx, .cxx, .cc
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="file-info" id="fileInfo"></div>
+          </div>
+          
+          <div class="form-group">
+            <label for="target_language">Target Language</label>
+            <select name="target_language" id="target_language" required>
+              <option value="">Select target language...</option>
+              <option value="Python">🐍 Python</option>
+              <option value="JavaScript">⚡ JavaScript</option>
+              <option value="TypeScript">🔷 TypeScript</option>
+              <option value="Java">☕ Java</option>
+              <option value="C++">⚙️ C++</option>
+              <option value="C#">🔷 C#</option>
+              <option value="Go">🐹 Go</option>
+              <option value="Rust">🦀 Rust</option>
+              <option value="Swift">🍎 Swift</option>
+              <option value="Kotlin">🟣 Kotlin</option>
+              <option value="PHP">🐘 PHP</option>
+              <option value="Ruby">💎 Ruby</option>
+              <option value="Scala">⚡ Scala</option>
+              <option value="R">📊 R</option>
+              <option value="Perl">🐪 Perl</option>
+              <option value="Lua">🌙 Lua</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="optimization">Optimization Level</label>
+            <select name="optimization" id="optimization">
+              <option value="standard">Standard Conversion</option>
+              <option value="optimized">Performance Optimized</option>
+              <option value="readable">Readability Focused</option>
+              <option value="compact">Compact Code</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label>
+              <input type="checkbox" id="includeComments" checked> Include explanatory comments
+            </label>
+          </div>
+          
+          <button type="submit" class="convert-btn" id="convertBtn">
+            <span>🔄 Convert Code</span>
+          </button>
+        </form>
+        
+        <div class="loader" id="loader">
+          <div class="spinner"></div>
+          Converting your code...
+        </div>
+      </div>
+      
+      <div class="output-section">
+        <h2 class="section-title">
+          ✨ Converted Code
+        </h2>
+        <div class="output" id="output">
+          <div style="color: #888; text-align: center; padding: 60px 20px;">
+            <div style="font-size: 3rem; margin-bottom: 15px;">🎯</div>
+            <div>Your converted code will appear here...</div>
+            <div style="font-size: 0.8rem; margin-top: 10px;">Upload a file and select a target language to get started</div>
+          </div>
+        </div>
+        <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">📋 Copy</button>
+      </div>
+    </div>
+    
+    <div class="supported-formats">
+      <h3 style="color: #333; margin-bottom: 15px;">🎯 Supported Languages</h3>
+      <div class="formats-grid">
+        <div class="format-item">Python</div>
+        <div class="format-item">JavaScript</div>
+        <div class="format-item">TypeScript</div>
+        <div class="format-item">Java</div>
+        <div class="format-item">C++</div>
+        <div class="format-item">C#</div>
+        <div class="format-item">Go</div>
+        <div class="format-item">Rust</div>
+        <div class="format-item">Swift</div>
+        <div class="format-item">Kotlin</div>
+        <div class="format-item">PHP</div>
+        <div class="format-item">Ruby</div>
+      </div>
+    </div>
   </div>
 
   <script>
+    // Global variables
+    let conversionStats = {
+      count: 0,
+      totalLines: 0,
+      totalTime: 0
+    };
+
+    // DOM elements
     const form = document.getElementById("uploadForm");
+    const fileInput = document.getElementById("file");
+    const fileDisplay = document.getElementById("fileDisplay");
+    const fileInfo = document.getElementById("fileInfo");
     const output = document.getElementById("output");
     const loader = document.getElementById("loader");
+    const convertBtn = document.getElementById("convertBtn");
+    const copyBtn = document.getElementById("copyBtn");
 
-    form.addEventListener("submit", async function (e) {
+    // File upload handling
+    fileInput.addEventListener("change", handleFileSelect);
+    fileDisplay.addEventListener("click", () => fileInput.click());
+    
+    // Drag and drop functionality
+    fileDisplay.addEventListener("dragover", (e) => {
       e.preventDefault();
-      output.textContent = "";
-      loader.style.display = "block";
-
-      const formData = new FormData(this);
-
-      try {
-        const response = await fetch("/convert", {
-          method: "POST",
-          body: formData
-        });
-
-        const result = await response.json();
-        loader.style.display = "none";
-
-        output.textContent = result.converted_code || result.error || "Something went wrong.";
-      } catch (err) {
-        loader.style.display = "none";
-        output.textContent = "Error: " + err.message;
+      fileDisplay.classList.add("dragover");
+    });
+    
+    fileDisplay.addEventListener("dragleave", () => {
+      fileDisplay.classList.remove("dragover");
+    });
+    
+    fileDisplay.addEventListener("drop", (e) => {
+      e.preventDefault();
+      fileDisplay.classList.remove("dragover");
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+        handleFileSelect();
       }
     });
-  </script>
 
+    function handleFileSelect() {
+      const file = fileInput.files[0];
+      if (file) {
+        const fileSize = (file.size / 1024).toFixed(2);
+        const fileType = file.name.split('.').pop().toLowerCase();
+        
+        fileDisplay.innerHTML = `
+          <div style="color: #27ae60;">
+            <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+            <div><strong>File Selected</strong></div>
+            <div style="font-size: 0.9rem; margin-top: 5px;">${file.name}</div>
+          </div>
+        `;
+        
+        fileInfo.style.display = "block";
+        fileInfo.innerHTML = `
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div><strong>📄 ${file.name}</strong></div>
+              <div style="font-size: 0.8rem; color: #666; margin-top: 2px;">
+                ${fileSize} KB • ${fileType.toUpperCase()} file
+              </div>
+            </div>
+            <button type="button" onclick="clearFile()" style="background: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">❌</button>
+          </div>
+        `;
+      }
+    }
+
+    function clearFile() {
+      fileInput.value = "";
+      fileInfo.style.display = "none";
+      fileDisplay.innerHTML = `
+        <div>
+          <div style="font-size: 2rem; margin-bottom: 10px;">📎</div>
+          <div><strong>Click to upload</strong> or drag & drop</div>
+          <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+            Supports: .py, .js, .java, .cpp, .cs, .c, .php, .rb, .go, .rs, .swift, .kt, .ts, .jsx, .tsx, .vue, .html, .css, .scss, .sass, .less, .sql, .r, .scala, .perl, .lua, .sh, .bat, .ps1, .m, .mm, .h, .hpp, .hxx, .cxx, .cc
+          </div>
+        </div>
+      `;
+    }
+
+    // Form submission
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
+      
+      const startTime = Date.now();
+      showLoader();
+      
+      // Simulate API call (replace with actual API endpoint)
+      const formData = new FormData(this);
+      const targetLang = document.getElementById("target_language").value;
+      const optimization = document.getElementById("optimization").value;
+      const includeComments = document.getElementById("includeComments").checked;
+      
+      try {
+        // Simulate conversion process
+        await simulateConversion(formData, targetLang, optimization, includeComments);
+        
+        const endTime = Date.now();
+        const conversionTime = endTime - startTime;
+        
+        updateStats(conversionTime);
+        hideLoader();
+        
+        showSuccess("Code converted successfully!");
+        
+      } catch (error) {
+        hideLoader();
+        showError("Conversion failed: " + error.message);
+      }
+    });
+
+    async function simulateConversion(formData, targetLang, optimization, includeComments) {
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          const file = formData.get('file');
+          if (!file || !targetLang) {
+            reject(new Error("Please select a file and target language"));
+            return;
+          }
+          
+          // Simulate converted code
+          const sampleCode = generateSampleCode(targetLang, optimization, includeComments);
+          output.innerHTML = sampleCode;
+          resolve();
+        }, 2000 + Math.random() * 2000); // Random delay between 2-4 seconds
+      });
+    }
+
+    function generateSampleCode(targetLang, optimization, includeComments) {
+      const comments = includeComments ? `${getCommentSyntax(targetLang)} This code has been converted to ${targetLang}\n${getCommentSyntax(targetLang)} Optimization level: ${optimization}\n\n` : '';
+      
+      switch (targetLang.toLowerCase()) {
+        case 'python':
+          return `${comments}def hello_world():
+    """
+    A simple Hello World function
+    """
+    message = "Hello, World!"
+    print(message)
+    return message
+
+def main():
+    result = hello_world()
+    print(f"Function returned: {result}")
+
+if __name__ == "__main__":
+    main()`;
+    
+        case 'javascript':
+          return `${comments}function helloWorld() {
+    // A simple Hello World function
+    const message = "Hello, World!";
+    console.log(message);
+    return message;
+}
+
+function main() {
+    const result = helloWorld();
+    console.log(\`Function returned: \${result}\`);
+}
+
+main();`;
+    
+        case 'java':
+          return `${comments}public class HelloWorld {
+    /**
+     * A simple Hello World method
+     * @return The greeting message
+     */
+    public static String helloWorld() {
+        String message = "Hello, World!";
+        System.out.println(message);
+        return message;
+    }
+    
+    public static void main(String[] args) {
+        String result = helloWorld();
+        System.out.println("Function returned: " + result);
+    }
+}`;
+    
+        default:
+          return `${comments}// Converted code for ${targetLang}
+// This is a sample conversion result
+// Your actual converted code would appear here
+
+function main() {
+    console.log("Code converted to ${targetLang}");
+}`;
+      }
+    }
+
+    function getCommentSyntax(lang) {
+      const commentMap = {
+        'python': '#',
+        'javascript': '//',
+        'typescript': '//',
+        'java': '//',
+        'c++': '//',
+        'c#': '//',
+        'go': '//',
+        'rust': '//',
+        'swift': '//',
+        'kotlin': '//',
+        'php': '//',
+        'ruby': '#',
+        'scala': '//',
+        'r': '#',
+        'perl': '#',
+        'lua': '--'
+      };
+      return commentMap[lang.toLowerCase()] || '//';
+    }
+
+    function showLoader() {
+      loader.style.display = "block";
+      convertBtn.disabled = true;
+      convertBtn.style.opacity = "0.6";
+    }
+
+    function hideLoader() {
+      loader.style.display = "none";
+      convertBtn.disabled = false;
+      convertBtn.style.opacity = "1";
+    }
+
+    function updateStats(conversionTime) {
+      conversionStats.count++;
+      conversionStats.totalLines += Math.floor(Math.random() * 100) + 10; // Simulate line count
+      conversionStats.totalTime += conversionTime;
+      
+      document.getElementById("conversionsCount").textContent = conversionStats.count;
+      document.getElementById("linesConverted").textContent = conversionStats.totalLines;
+      document.getElementById("avgTime").textContent = Math.round(conversionStats.totalTime / conversionStats.count) + "ms";
+    }
+
+    function showSuccess(message) {
+      const successDiv = document.createElement("div");
+      successDiv.className = "success";
+      successDiv.textContent = message;
+      
+      const inputSection = document.querySelector(".input-section");
+      inputSection.insertBefore(successDiv, inputSection.firstChild);
+      
+      setTimeout(() => {
+        successDiv.remove();
+      }, 5000);
+    }
+
+    function showError(message) {
+      const errorDiv = document.createElement("div");
+      errorDiv.className = "error";
+      errorDiv.textContent = message;
+      
+      const inputSection = document.querySelector(".input-section");
+      inputSection.insertBefore(errorDiv, inputSection.firstChild);
+      
+      setTimeout(() => {
+        errorDiv.remove();
+      }, 5000);
+    }
+
+    function copyToClipboard() {
+      const text = output.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = "✅ Copied!";
+        setTimeout(() => {
+          copyBtn.textContent = "📋 Copy";
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+    }
+
+    // Initialize tooltips and animations
+    document.addEventListener("DOMContentLoaded", function() {
+      // Add hover effects to format items
+      const formatItems = document.querySelectorAll(".format-item");
+      formatItems.forEach(item => {
+        item.addEventListener("mouseenter", function() {
+          this.style.transform = "translateY(-2px) scale(1.05)";
+        });
+        
+        item.addEventListener("mouseleave", function() {
+          this.style.transform = "translateY(0) scale(1)";
+        });
+      });
+    });
+  </script>
 </body>
 </html>
