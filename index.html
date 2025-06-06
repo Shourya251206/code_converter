@@ -251,6 +251,7 @@
       overflow: auto;
       position: relative;
       min-height: 200px;
+      white-space: pre-wrap;
     }
     
     .output::-webkit-scrollbar {
@@ -267,10 +268,21 @@
       border-radius: 4px;
     }
     
-    .copy-btn {
+    .output-actions {
       position: absolute;
       top: 10px;
       right: 10px;
+      display: flex;
+      gap: 8px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .output-section:hover .output-actions {
+      opacity: 1;
+    }
+    
+    .action-btn {
       background: #667eea;
       color: white;
       border: none;
@@ -278,12 +290,19 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.8rem;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: background 0.3s ease;
     }
     
-    .output-section:hover .copy-btn {
-      opacity: 1;
+    .action-btn:hover {
+      background: #5a6fd8;
+    }
+    
+    .download-btn {
+      background: #27ae60;
+    }
+    
+    .download-btn:hover {
+      background: #219a52;
     }
     
     .stats {
@@ -350,6 +369,7 @@
       padding: 15px;
       border-radius: 8px;
       border-left: 4px solid #e74c3c;
+      margin-bottom: 20px;
     }
     
     .success {
@@ -358,6 +378,7 @@
       padding: 15px;
       border-radius: 8px;
       border-left: 4px solid #27ae60;
+      margin-bottom: 20px;
     }
     
     @media (max-width: 768px) {
@@ -409,13 +430,13 @@
           <div class="form-group">
             <label for="file">Upload Code File</label>
             <div class="file-input-wrapper">
-              <input type="file" name="file" id="file" class="file-input" accept=".py,.js,.java,.cpp,.cs,.c,.php,.rb,.go,.rs,.swift,.kt,.ts,.jsx,.tsx,.vue,.html,.css,.scss,.sass,.less,.sql,.r,.scala,.perl,.lua,.sh,.bat,.ps1,.m,.mm,.h,.hpp,.hxx,.cxx,.cc">
+              <input type="file" name="file" id="file" class="file-input" accept=".py,.js,.java,.cpp,.cs,.c,.php,.rb,.go">
               <div class="file-input-display" id="fileDisplay">
                 <div>
                   <div style="font-size: 2rem; margin-bottom: 10px;">📎</div>
                   <div><strong>Click to upload</strong> or drag & drop</div>
                   <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
-                    Supports: .py, .js, .java, .cpp, .cs, .c, .php, .rb, .go, .rs, .swift, .kt, .ts, .jsx, .tsx, .vue, .html, .css, .scss, .sass, .less, .sql, .r, .scala, .perl, .lua, .sh, .bat, .ps1, .m, .mm, .h, .hpp, .hxx, .cxx, .cc
+                    Supports: .py, .js, .java, .cpp, .cs, .c, .php, .rb, .go
                   </div>
                 </div>
               </div>
@@ -429,37 +450,14 @@
               <option value="">Select target language...</option>
               <option value="Python">🐍 Python</option>
               <option value="JavaScript">⚡ JavaScript</option>
-              <option value="TypeScript">🔷 TypeScript</option>
               <option value="Java">☕ Java</option>
               <option value="C++">⚙️ C++</option>
               <option value="C#">🔷 C#</option>
               <option value="Go">🐹 Go</option>
-              <option value="Rust">🦀 Rust</option>
-              <option value="Swift">🍎 Swift</option>
-              <option value="Kotlin">🟣 Kotlin</option>
               <option value="PHP">🐘 PHP</option>
               <option value="Ruby">💎 Ruby</option>
-              <option value="Scala">⚡ Scala</option>
-              <option value="R">📊 R</option>
-              <option value="Perl">🐪 Perl</option>
-              <option value="Lua">🌙 Lua</option>
+              <option value="C">🔧 C</option>
             </select>
-          </div>
-          
-          <div class="form-group">
-            <label for="optimization">Optimization Level</label>
-            <select name="optimization" id="optimization">
-              <option value="standard">Standard Conversion</option>
-              <option value="optimized">Performance Optimized</option>
-              <option value="readable">Readability Focused</option>
-              <option value="compact">Compact Code</option>
-            </select>
-          </div>
-          
-          <div class="form-group">
-            <label>
-              <input type="checkbox" id="includeComments" checked> Include explanatory comments
-            </label>
           </div>
           
           <button type="submit" class="convert-btn" id="convertBtn">
@@ -484,7 +482,10 @@
             <div style="font-size: 0.8rem; margin-top: 10px;">Upload a file and select a target language to get started</div>
           </div>
         </div>
-        <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">📋 Copy</button>
+        <div class="output-actions">
+          <button class="action-btn" id="copyBtn" onclick="copyToClipboard()">📋 Copy</button>
+          <button class="action-btn download-btn" id="downloadBtn" onclick="downloadCode()" style="display: none;">📥 Download</button>
+        </div>
       </div>
     </div>
     
@@ -493,16 +494,13 @@
       <div class="formats-grid">
         <div class="format-item">Python</div>
         <div class="format-item">JavaScript</div>
-        <div class="format-item">TypeScript</div>
         <div class="format-item">Java</div>
         <div class="format-item">C++</div>
         <div class="format-item">C#</div>
         <div class="format-item">Go</div>
-        <div class="format-item">Rust</div>
-        <div class="format-item">Swift</div>
-        <div class="format-item">Kotlin</div>
         <div class="format-item">PHP</div>
         <div class="format-item">Ruby</div>
+        <div class="format-item">C</div>
       </div>
     </div>
   </div>
@@ -515,6 +513,12 @@
       totalTime: 0
     };
 
+    let currentConversion = {
+      code: '',
+      language: '',
+      filename: ''
+    };
+
     // DOM elements
     const form = document.getElementById("uploadForm");
     const fileInput = document.getElementById("file");
@@ -524,6 +528,7 @@
     const loader = document.getElementById("loader");
     const convertBtn = document.getElementById("convertBtn");
     const copyBtn = document.getElementById("copyBtn");
+    const downloadBtn = document.getElementById("downloadBtn");
 
     // File upload handling
     fileInput.addEventListener("change", handleFileSelect);
@@ -586,144 +591,77 @@
           <div style="font-size: 2rem; margin-bottom: 10px;">📎</div>
           <div><strong>Click to upload</strong> or drag & drop</div>
           <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
-            Supports: .py, .js, .java, .cpp, .cs, .c, .php, .rb, .go, .rs, .swift, .kt, .ts, .jsx, .tsx, .vue, .html, .css, .scss, .sass, .less, .sql, .r, .scala, .perl, .lua, .sh, .bat, .ps1, .m, .mm, .h, .hpp, .hxx, .cxx, .cc
+            Supports: .py, .js, .java, .cpp, .cs, .c, .php, .rb, .go
           </div>
         </div>
       `;
     }
 
-    // Form submission
+    // Form submission - Updated to use real API
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
       
       const startTime = Date.now();
       showLoader();
       
-      // Simulate API call (replace with actual API endpoint)
       const formData = new FormData(this);
       const targetLang = document.getElementById("target_language").value;
-      const optimization = document.getElementById("optimization").value;
-      const includeComments = document.getElementById("includeComments").checked;
       
       try {
-        // Simulate conversion process
-        await simulateConversion(formData, targetLang, optimization, includeComments);
+        const response = await fetch('/convert', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          throw new Error(result.error || 'Conversion failed');
+        }
         
         const endTime = Date.now();
         const conversionTime = endTime - startTime;
         
-        updateStats(conversionTime);
+        // Store conversion data
+        currentConversion = {
+          code: result.converted_code,
+          language: targetLang,
+          filename: getFileName(fileInput.files[0].name, targetLang)
+        };
+        
+        // Display the converted code
+        output.textContent = result.converted_code;
+        
+        // Show download button
+        downloadBtn.style.display = 'inline-block';
+        
+        updateStats(conversionTime, result.converted_code);
         hideLoader();
         
-        showSuccess("Code converted successfully!");
+        showSuccess(`Code converted successfully from ${result.source_language} to ${targetLang}!`);
         
       } catch (error) {
         hideLoader();
         showError("Conversion failed: " + error.message);
+        console.error('Conversion error:', error);
       }
     });
 
-    async function simulateConversion(formData, targetLang, optimization, includeComments) {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          const file = formData.get('file');
-          if (!file || !targetLang) {
-            reject(new Error("Please select a file and target language"));
-            return;
-          }
-          
-          // Simulate converted code
-          const sampleCode = generateSampleCode(targetLang, optimization, includeComments);
-          output.innerHTML = sampleCode;
-          resolve();
-        }, 2000 + Math.random() * 2000); // Random delay between 2-4 seconds
-      });
-    }
-
-    function generateSampleCode(targetLang, optimization, includeComments) {
-      const comments = includeComments ? `${getCommentSyntax(targetLang)} This code has been converted to ${targetLang}\n${getCommentSyntax(targetLang)} Optimization level: ${optimization}\n\n` : '';
-      
-      switch (targetLang.toLowerCase()) {
-        case 'python':
-          return `${comments}def hello_world():
-    """
-    A simple Hello World function
-    """
-    message = "Hello, World!"
-    print(message)
-    return message
-
-def main():
-    result = hello_world()
-    print(f"Function returned: {result}")
-
-if __name__ == "__main__":
-    main()`;
-    
-        case 'javascript':
-          return `${comments}function helloWorld() {
-    // A simple Hello World function
-    const message = "Hello, World!";
-    console.log(message);
-    return message;
-}
-
-function main() {
-    const result = helloWorld();
-    console.log(\`Function returned: \${result}\`);
-}
-
-main();`;
-    
-        case 'java':
-          return `${comments}public class HelloWorld {
-    /**
-     * A simple Hello World method
-     * @return The greeting message
-     */
-    public static String helloWorld() {
-        String message = "Hello, World!";
-        System.out.println(message);
-        return message;
-    }
-    
-    public static void main(String[] args) {
-        String result = helloWorld();
-        System.out.println("Function returned: " + result);
-    }
-}`;
-    
-        default:
-          return `${comments}// Converted code for ${targetLang}
-// This is a sample conversion result
-// Your actual converted code would appear here
-
-function main() {
-    console.log("Code converted to ${targetLang}");
-}`;
-      }
-    }
-
-    function getCommentSyntax(lang) {
-      const commentMap = {
-        'python': '#',
-        'javascript': '//',
-        'typescript': '//',
-        'java': '//',
-        'c++': '//',
-        'c#': '//',
-        'go': '//',
-        'rust': '//',
-        'swift': '//',
-        'kotlin': '//',
-        'php': '//',
-        'ruby': '#',
-        'scala': '//',
-        'r': '#',
-        'perl': '#',
-        'lua': '--'
+    function getFileName(originalName, targetLang) {
+      const baseName = originalName.split('.')[0];
+      const extensions = {
+        'Python': 'py',
+        'JavaScript': 'js',
+        'Java': 'java',
+        'C++': 'cpp',
+        'C#': 'cs',
+        'Go': 'go',
+        'PHP': 'php',
+        'Ruby': 'rb',
+        'C': 'c'
       };
-      return commentMap[lang.toLowerCase()] || '//';
+      
+      return `${baseName}_converted.${extensions[targetLang] || 'txt'}`;
     }
 
     function showLoader() {
@@ -738,9 +676,10 @@ function main() {
       convertBtn.style.opacity = "1";
     }
 
-    function updateStats(conversionTime) {
+    function updateStats(conversionTime, code) {
       conversionStats.count++;
-      conversionStats.totalLines += Math.floor(Math.random() * 100) + 10; // Simulate line count
+      const lineCount = code.split('\n').length;
+      conversionStats.totalLines += lineCount;
       conversionStats.totalTime += conversionTime;
       
       document.getElementById("conversionsCount").textContent = conversionStats.count;
@@ -776,14 +715,49 @@ function main() {
 
     function copyToClipboard() {
       const text = output.textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = "✅ Copied!";
+      if (text && text.trim() !== '') {
+        navigator.clipboard.writeText(text).then(() => {
+          copyBtn.textContent = "✅ Copied!";
+          setTimeout(() => {
+            copyBtn.textContent = "📋 Copy";
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+          // Fallback for older browsers
+          const textArea = document.createElement('textarea');
+          textArea.value = text;
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand('copy');
+          document.body.removeChild(textArea);
+          
+          copyBtn.textContent = "✅ Copied!";
+          setTimeout(() => {
+            copyBtn.textContent = "📋 Copy";
+          }, 2000);
+        });
+      }
+    }
+
+    function downloadCode() {
+      if (currentConversion.code) {
+        const blob = new Blob([currentConversion.code], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = currentConversion.filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        // Visual feedback
+        const originalText = downloadBtn.textContent;
+        downloadBtn.textContent = "✅ Downloaded!";
         setTimeout(() => {
-          copyBtn.textContent = "📋 Copy";
+          downloadBtn.textContent = originalText;
         }, 2000);
-      }).catch(err => {
-        console.error('Failed to copy text: ', err);
-      });
+      }
     }
 
     // Initialize tooltips and animations
